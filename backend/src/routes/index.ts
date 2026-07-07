@@ -7,6 +7,7 @@ import projectRoutes from './project.routes'
 import ticketRoutes from './ticket.routes'
 import fuelProviderRoutes from './fuel_provider.routes'
 import weeklyBalanceRoutes from './weekly_balance.routes'
+import supplyRequestRoutes from './supply_request.routes'
 
 const router = Router()
 
@@ -17,5 +18,6 @@ router.use('/projects', projectRoutes)
 router.use('/tickets', ticketRoutes)
 router.use('/fuel-providers', fuelProviderRoutes)
 router.use('/weekly-balances', weeklyBalanceRoutes)
+router.use('/supply-requests', supplyRequestRoutes)
 
 export default router

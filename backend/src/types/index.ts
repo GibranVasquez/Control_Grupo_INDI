@@ -79,6 +79,33 @@ export interface TicketWithLines extends Ticket {
   lines: TicketLine[]
 }
 
+export interface SupplyRequest {
+  id: string
+  type: 'fuel' | 'material'
+  project_id: string
+  requested_by: string
+  needed_by: string
+  status: 'pending' | 'approved' | 'rejected' | 'fulfilled'
+  approved_by: string | null
+  approved_at: string | null
+  comments: string | null
+  created_at: string
+}
+
+export interface SupplyRequestItem {
+  id: string
+  request_id: string
+  vehicle_id: string | null
+  item_name: string
+  quantity: number
+  unit: string
+  created_at: string
+}
+
+export interface SupplyRequestWithItems extends SupplyRequest {
+  items: SupplyRequestItem[]
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean
   data: T
