@@ -1,5 +1,8 @@
-import app from './app.js'
-import { config } from './config/index.js'
+import app from './app'
+import { config } from './config/index'
+import { validateEnv } from './config/env'
+
+validateEnv()
 
 const { port } = config
 

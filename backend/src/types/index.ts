@@ -20,6 +20,7 @@ export interface Project {
   name: string
   client: string
   budget: number
+  active: boolean
   created_at: string
 }
 
@@ -27,7 +28,8 @@ export interface Ticket {
   id: string
   project_id: string
   vehicle_id: string
-  operator: string
+  user_id: string
+  date: string
   liters: number
   cost_per_liter: number
   total: number
@@ -41,6 +43,7 @@ export interface ApiResponse<T = unknown> {
   success: boolean
   data: T
   message: string
+  error?: unknown
 }
 
 export interface LoginRequest {

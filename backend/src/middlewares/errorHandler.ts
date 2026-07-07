@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express'
 
-import { sendError } from '../utils/apiResponse.js'
+import { sendError } from '../utils/apiResponse'
 
 export function errorHandler(
   err: Error,
@@ -8,6 +8,6 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
-  console.error('[ErrorHandler]', err.message, err.stack)
-  sendError(res, 'Internal server error', 500)
+  console.error('[ErrorHandler]', err.message)
+  sendError(res, 'Internal server error', 500, err.message)
 }

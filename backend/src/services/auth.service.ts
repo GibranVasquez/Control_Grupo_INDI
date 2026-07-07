@@ -1,13 +1,13 @@
-import { supabaseAdmin } from '../lib/supabase.js'
-import * as userRepository from '../repositories/user.repository.js'
+import { supabase, supabaseAdmin } from '../lib/supabase'
+import * as userRepository from '../repositories/user.repository'
 
-import type { User } from '../types/index.js'
+import type { User } from '../types/index'
 
 export async function login(
   email: string,
   password: string,
 ): Promise<{ user: User; token: string }> {
-  const { data, error } = await supabaseAdmin.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })

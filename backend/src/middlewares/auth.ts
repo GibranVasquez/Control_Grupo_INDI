@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
 
-import { supabaseAdmin } from '../lib/supabase.js'
-import { sendError } from '../utils/apiResponse.js'
+import { supabaseAdmin } from '../lib/supabase'
+import { sendError } from '../utils/apiResponse'
 
 export interface AuthenticatedRequest extends Request {
   userId?: string
