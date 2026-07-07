@@ -1,5 +1,5 @@
 import app from './app'
-import { config } from './config/index'
+import { config } from './config'
 import { validateEnv } from './config/env'
 
 validateEnv()

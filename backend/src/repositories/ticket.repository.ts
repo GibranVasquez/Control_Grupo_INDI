@@ -1,9 +1,23 @@
 import { supabaseAdmin } from '../lib/supabase'
 
-import type { Ticket } from '../types/index'
+import type { Ticket, TicketLine, TicketWithLines } from '../types/index'
 
-type CreateTicketInput = Omit<Ticket, 'id' | 'created_at' | 'status'>
-type UpdateTicketInput = Partial<CreateTicketInput> & { status?: Ticket['status'] }
+export type CreateTicketLineInput = {
+  vehicle_id: string
+  liters: number
+  cost_per_liter: number
+  total: number
+  odometer?: number | null
+  activity?: string | null
+}
+
+export type CreateTicketInput = Omit<Ticket, 'id' | 'created_at' | 'status'> & {
+  lines: CreateTicketLineInput[]
+}
+
+export type UpdateTicketInput = Partial<
+  Pick<Ticket, 'project_id' | 'user_id' | 'date' | 'provider_id' | 'folio' | 'receipt_image_url' | 'notes' | 'status'>
+>
 
 export async function findAllTickets(): Promise<Ticket[]> {
   const { data, error } = await supabaseAdmin
@@ -15,30 +29,50 @@ export async function findAllTickets(): Promise<Ticket[]> {
   return data ?? []
 }
 
-export async function findTicketById(id: string): Promise<Ticket | null> {
-  const { data, error } = await supabaseAdmin
+export async function findTicketById(id: string): Promise<TicketWithLines | null> {
+  const { data: ticket, error: ticketError } = await supabaseAdmin
     .from('tickets')
     .select('*')
     .eq('id', id)
     .single()
 
-  if (error) {
-    if (error.code === 'PGRST116') return null
-    throw error
+  if (ticketError) {
+    if (ticketError.code === 'PGRST116') return null
+    throw ticketError
   }
 
-  return data
+  const { data: lines, error: linesError } = await supabaseAdmin
+    .from('ticket_lines')
+    .select('*')
+    .eq('ticket_id', id)
+    .order('created_at', { ascending: true })
+
+  if (linesError) throw linesError
+
+  return { ...ticket, lines: (lines ?? []) as TicketLine[] }
 }
 
-export async function createTicket(input: CreateTicketInput): Promise<Ticket> {
-  const { data, error } = await supabaseAdmin
+export async function createTicket(input: CreateTicketInput): Promise<TicketWithLines> {
+  const { lines, ...ticketData } = input
+
+  const { data: ticket, error: ticketError } = await supabaseAdmin
     .from('tickets')
-    .insert([{ ...input, status: 'pending' }])
+    .insert([{ ...ticketData, status: 'pending' }])
     .select()
     .single()
 
-  if (error) throw error
-  return data
+  if (ticketError) throw ticketError
+
+  const lineRows = lines.map((l) => ({ ...l, ticket_id: ticket.id }))
+
+  const { data: insertedLines, error: linesError } = await supabaseAdmin
+    .from('ticket_lines')
+    .insert(lineRows)
+    .select()
+
+  if (linesError) throw linesError
+
+  return { ...ticket, lines: (insertedLines ?? []) as TicketLine[] }
 }
 
 export async function updateTicketStatus(

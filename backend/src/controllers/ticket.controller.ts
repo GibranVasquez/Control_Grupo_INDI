@@ -46,23 +46,41 @@ export async function create(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const { project_id, vehicle_id, user_id, date, liters, cost_per_liter, total, receipt_image_url, notes } = req.body
+    const { project_id, user_id, date, provider_id, folio, receipt_image_url, notes, lines } = req.body
 
-    if (!project_id || !vehicle_id || !user_id || !date || liters == null || cost_per_liter == null || total == null) {
-      sendError(res, 'Missing required fields: project_id, vehicle_id, user_id, date, liters, cost_per_liter, total', 400)
+    if (!project_id || !user_id || !date) {
+      sendError(res, 'Missing required fields: project_id, user_id, date', 400)
       return
+    }
+
+    if (!Array.isArray(lines) || lines.length === 0) {
+      sendError(res, 'lines must be a non-empty array', 400)
+      return
+    }
+
+    for (const [i, line] of lines.entries()) {
+      if (!line.vehicle_id || line.liters == null || line.cost_per_liter == null || line.total == null) {
+        sendError(res, `Line ${i}: missing required fields (vehicle_id, liters, cost_per_liter, total)`, 400)
+        return
+      }
     }
 
     const ticket = await ticketService.createTicket({
       project_id,
-      vehicle_id,
       user_id,
       date,
-      liters: Number(liters),
-      cost_per_liter: Number(cost_per_liter),
-      total: Number(total),
+      provider_id: provider_id ?? null,
+      folio: folio ?? null,
       receipt_image_url: receipt_image_url ?? null,
       notes: notes ?? null,
+      lines: lines.map((l: Record<string, unknown>) => ({
+        vehicle_id: l['vehicle_id'] as string,
+        liters: Number(l['liters']),
+        cost_per_liter: Number(l['cost_per_liter']),
+        total: Number(l['total']),
+        odometer: l['odometer'] != null ? Number(l['odometer']) : null,
+        activity: (l['activity'] as string | undefined) ?? null,
+      })),
     })
 
     sendSuccess(res, ticket, 'Ticket created', 201)
@@ -83,21 +101,23 @@ export async function update(
       return
     }
 
-    const { project_id, vehicle_id, user_id, date, liters, cost_per_liter, total, receipt_image_url, notes, status } = req.body
+    const { project_id, user_id, date, provider_id, folio, receipt_image_url, notes, status } = req.body
 
-    if (project_id === undefined && vehicle_id === undefined && user_id === undefined && date === undefined && liters === undefined && cost_per_liter === undefined && total === undefined && receipt_image_url === undefined && notes === undefined && status === undefined) {
+    if (
+      project_id === undefined && user_id === undefined && date === undefined &&
+      provider_id === undefined && folio === undefined && receipt_image_url === undefined &&
+      notes === undefined && status === undefined
+    ) {
       sendError(res, 'At least one field required to update', 400)
       return
     }
 
     const ticket = await ticketService.updateTicket(id, {
       ...(project_id !== undefined && { project_id }),
-      ...(vehicle_id !== undefined && { vehicle_id }),
       ...(user_id !== undefined && { user_id }),
       ...(date !== undefined && { date }),
-      ...(liters !== undefined && { liters: Number(liters) }),
-      ...(cost_per_liter !== undefined && { cost_per_liter: Number(cost_per_liter) }),
-      ...(total !== undefined && { total: Number(total) }),
+      ...(provider_id !== undefined && { provider_id }),
+      ...(folio !== undefined && { folio }),
       ...(receipt_image_url !== undefined && { receipt_image_url }),
       ...(notes !== undefined && { notes }),
       ...(status !== undefined && { status }),
@@ -125,11 +145,13 @@ export async function approve(
       sendError(res, 'Invalid ticket id', 400)
       return
     }
+
     const ticket = await ticketService.approveTicket(id)
     if (!ticket) {
       sendError(res, 'Ticket not found', 404)
       return
     }
+
     sendSuccess(res, ticket, 'Ticket approved')
   } catch (err) {
     next(err)
@@ -147,11 +169,13 @@ export async function reject(
       sendError(res, 'Invalid ticket id', 400)
       return
     }
+
     const ticket = await ticketService.rejectTicket(id)
     if (!ticket) {
       sendError(res, 'Ticket not found', 404)
       return
     }
+
     sendSuccess(res, ticket, 'Ticket rejected')
   } catch (err) {
     next(err)

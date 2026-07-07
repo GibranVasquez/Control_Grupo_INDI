@@ -5,6 +5,8 @@ import userRoutes from './user.routes'
 import vehicleRoutes from './vehicle.routes'
 import projectRoutes from './project.routes'
 import ticketRoutes from './ticket.routes'
+import fuelProviderRoutes from './fuel_provider.routes'
+import weeklyBalanceRoutes from './weekly_balance.routes'
 
 const router = Router()
 
@@ -13,5 +15,7 @@ router.use('/users', userRoutes)
 router.use('/vehicles', vehicleRoutes)
 router.use('/projects', projectRoutes)
 router.use('/tickets', ticketRoutes)
+router.use('/fuel-providers', fuelProviderRoutes)
+router.use('/weekly-balances', weeklyBalanceRoutes)
 
 export default router
