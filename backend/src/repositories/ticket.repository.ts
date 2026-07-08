@@ -1,6 +1,6 @@
 import { supabaseAdmin } from '../lib/supabase'
 
-import type { Ticket, TicketLine, TicketWithLines } from '../types/index'
+import type { Ticket, TicketLine, TicketStatus, TicketWithLines } from '../types/index'
 
 export type CreateTicketLineInput = {
   vehicle_id: string
@@ -77,7 +77,7 @@ export async function createTicket(input: CreateTicketInput): Promise<TicketWith
 
 export async function updateTicketStatus(
   id: string,
-  status: 'approved' | 'rejected',
+  status: TicketStatus,
 ): Promise<Ticket | null> {
   const { data, error } = await supabaseAdmin
     .from('tickets')

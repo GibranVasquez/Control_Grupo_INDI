@@ -134,54 +134,6 @@ export async function update(
   }
 }
 
-export async function approve(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const id = req.params['id']
-    if (!id || Array.isArray(id)) {
-      sendError(res, 'Invalid ticket id', 400)
-      return
-    }
-
-    const ticket = await ticketService.approveTicket(id)
-    if (!ticket) {
-      sendError(res, 'Ticket not found', 404)
-      return
-    }
-
-    sendSuccess(res, ticket, 'Ticket approved')
-  } catch (err) {
-    next(err)
-  }
-}
-
-export async function reject(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
-  try {
-    const id = req.params['id']
-    if (!id || Array.isArray(id)) {
-      sendError(res, 'Invalid ticket id', 400)
-      return
-    }
-
-    const ticket = await ticketService.rejectTicket(id)
-    if (!ticket) {
-      sendError(res, 'Ticket not found', 404)
-      return
-    }
-
-    sendSuccess(res, ticket, 'Ticket rejected')
-  } catch (err) {
-    next(err)
-  }
-}
-
 export async function remove(
   req: Request,
   res: Response,

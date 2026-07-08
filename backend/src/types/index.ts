@@ -59,8 +59,13 @@ export interface TicketLine {
   total: number
   odometer: number | null
   activity: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  approved_at: string | null
   created_at: string
 }
+
+export type TicketLineStatus = TicketLine['status']
 
 export interface Ticket {
   id: string
@@ -71,6 +76,7 @@ export interface Ticket {
   folio: string | null
   receipt_image_url: string | null
   notes: string | null
+  /** Derivado del estado de sus ticket_lines — nunca se actualiza directamente. */
   status: 'pending' | 'approved' | 'rejected'
   created_at: string
 }
@@ -111,6 +117,7 @@ export interface ApiResponse<T = unknown> {
   data: T
   message: string
   error?: unknown
+  warning?: string
 }
 
 export type TicketStatus = 'pending' | 'approved' | 'rejected'

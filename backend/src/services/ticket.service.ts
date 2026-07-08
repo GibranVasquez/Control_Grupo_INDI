@@ -1,6 +1,7 @@
 import * as ticketRepository from '../repositories/ticket.repository'
+import * as ticketLineRepository from '../repositories/ticket_line.repository'
 
-import type { Ticket, TicketWithLines } from '../types/index'
+import type { Ticket, TicketStatus, TicketWithLines } from '../types/index'
 import type { CreateTicketInput, UpdateTicketInput } from '../repositories/ticket.repository'
 
 export async function getAllTickets(): Promise<Ticket[]> {
@@ -22,12 +23,19 @@ export async function updateTicket(
   return ticketRepository.updateTicket(id, input)
 }
 
-export async function approveTicket(id: string): Promise<Ticket | null> {
-  return ticketRepository.updateTicketStatus(id, 'approved')
-}
+export async function recalculateTicketStatus(ticket_id: string): Promise<Ticket | null> {
+  const lines = await ticketLineRepository.findLineStatusesByTicketId(ticket_id)
 
-export async function rejectTicket(id: string): Promise<Ticket | null> {
-  return ticketRepository.updateTicketStatus(id, 'rejected')
+  let status: TicketStatus
+  if (lines.some((l) => l.status === 'pending')) {
+    status = 'pending'
+  } else if (lines.every((l) => l.status === 'rejected')) {
+    status = 'rejected'
+  } else {
+    status = 'approved'
+  }
+
+  return ticketRepository.updateTicketStatus(ticket_id, status)
 }
 
 export async function deleteTicket(id: string): Promise<boolean> {

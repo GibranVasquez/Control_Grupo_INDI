@@ -2,8 +2,14 @@ import type { Response } from 'express'
 
 import type { ApiResponse } from '../types/index'
 
-export function sendSuccess<T>(res: Response, data: T, message = 'OK', statusCode = 200): void {
-  const body: ApiResponse<T> = { success: true, data, message }
+export function sendSuccess<T>(
+  res: Response,
+  data: T,
+  message = 'OK',
+  statusCode = 200,
+  warning?: string,
+): void {
+  const body: ApiResponse<T> = { success: true, data, message, ...(warning !== undefined && { warning }) }
   res.status(statusCode).json(body)
 }
 
